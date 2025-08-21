@@ -1,13 +1,17 @@
 import logging
-
-# Unzip models_example.zip to initiate models dir structure
 import zipfile
 from pathlib import Path
+import importlib.resources as pkg_resources
 
-if not Path("bacpipe/model_checkpoints").exists():
-    with zipfile.ZipFile("bacpipe/model_checkpoints.zip", "r") as zip_ref:
-        zip_ref.extractall("bacpipe")
-
+# Unzip model_checkpoints.zip to initiate models dir structure (package-relative)
+try:
+    with pkg_resources.path(__package__, "model_checkpoints.zip") as zip_path:
+        checkpoints_dir = Path(__file__).parent / "model_checkpoints"
+        if not checkpoints_dir.exists():
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(checkpoints_dir)
+except Exception as e:
+    pass
 
 # Initialize Logger
 logger = logging.getLogger("bacpipe")

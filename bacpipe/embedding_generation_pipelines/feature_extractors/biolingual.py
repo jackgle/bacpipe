@@ -3,10 +3,16 @@ from transformers import pipeline
 from ..utils import ModelBaseClass
 import numpy as np
 import yaml
+from pathlib import Path
+import importlib.resources as pkg_resources
 
-
-with open("bacpipe/settings.yaml", "rb") as f:
-    settings = yaml.load(f, Loader=yaml.CLoader)
+# Use importlib.resources for settings.yaml
+try:
+    with pkg_resources.path("bacpipe", "settings.yaml") as settings_path:
+        with open(settings_path, "rb") as f:
+            settings = yaml.load(f, Loader=yaml.CLoader)
+except Exception:
+    settings = {}
 
 DEVICE = settings["device"]
 

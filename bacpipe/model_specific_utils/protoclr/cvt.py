@@ -24,6 +24,8 @@ from timm.models.layers import DropPath, trunc_normal_
 # from torchinfo import summary
 import yaml
 
+import importlib.resources as pkg_resources
+
 _model_entrypoints = {}
 
 
@@ -674,16 +676,16 @@ def build_model(config, **kwargs):
 
 
 def cvt13(**kwargs):
-    f = open("bacpipe/model_specific_utils/protoclr/config/cvt-13-224x224.yaml", "r")
-    config = yaml.load(f, Loader=yaml.CLoader)
+    with pkg_resources.files("bacpipe.model_specific_utils.protoclr.config").joinpath("cvt-13-224x224.yaml").open("r") as f:
+        config = yaml.load(f, Loader=yaml.CLoader)
     return ConvolutionalVisionTransformer(
         spec=config["MODEL"]["SPEC"]
-    )  # only loades the config, no pretraining
+    )  # only loads the config, no pretraining
 
 
 if __name__ == "__main__":
-    f = open("config/cvt-13-224x224.yaml", "r")
-    config = yaml.load(f, Loader=yaml.CLoader)
+    with pkg_resources.files("bacpipe.model_specific_utils.protoclr.config").joinpath("cvt-13-224x224.yaml").open("r") as f:
+        config = yaml.load(f, Loader=yaml.CLoader)
     model = ConvolutionalVisionTransformer(spec=config["MODEL"]["SPEC"])
     # print(summary(model))
     quit()

@@ -169,7 +169,10 @@ def make_set_paths_func(
     **kwargs,
 ):
     if testing:
-        main_results_dir = Path("bacpipe/tests/results_files")
+        # Use package-relative path for tests directory
+        import importlib.resources as pkg_resources
+        with pkg_resources.path("bacpipe.tests", "results_files") as test_results_dir:
+            main_results_dir = test_results_dir
         dim_reduc_parent_dir = "dimensionality_reduction"
     global get_paths
 
@@ -355,13 +358,18 @@ def concatenate_annotation_files(
         dff["audiofilename"] = file.stem + ".wav"
 
     if True:
-        short_to_species = pd.read_csv(
-            "/mnt/swap/Work/Data/Amphibians/AnuranSet/species.csv"
+        # Use environment variable or user-provided path for species.csv
+        species_csv_path = Path(
+            os.environ.get("SPECIES_CSV_PATH", "species.csv")
         )
-        for spe in df.label.unique():
-            df.label[df.label == spe] = short_to_species.SPECIES[
-                short_to_species.CODE == spe
-            ].values[0]
+        if not species_csv_path.is_file():
+            logger.warning(f"species.csv not found at {species_csv_path}. Skipping species mapping.")
+        else:
+            short_to_species = pd.read_csv(species_csv_path)
+            for spe in df.label.unique():
+                df.label[df.label == spe] = short_to_species.SPECIES[
+                    short_to_species.CODE == spe
+                ].values[0]
 
     df.to_csv(
         p.joinpath("annotations.csv"),

@@ -6,15 +6,12 @@ from bacpipe.generate_embeddings import Loader, Embedder
 import numpy as np
 from pathlib import Path
 
+import importlib.resources as pkg_resources
 
 # INITIALIZATION
 # Find all models in the pipelines directory
-models = [  # "avesecho_passt"]
-    mod.stem
-    for mod in Path("bacpipe/embedding_generation_pipelines/feature_extractors").glob(
-        "*.py"
-    )
-]
+feature_extractors_dir = pkg_resources.files("bacpipe.embedding_generation_pipelines.feature_extractors")
+models = [mod.stem for mod in feature_extractors_dir.glob("*.py")]
 
 # Only test models whos checkpoints have been downloaded
 models_requiring_checkpoints = [
@@ -32,8 +29,9 @@ models_requiring_checkpoints = [
     "protoclr",
     "vggish",
 ]
+checkpoints_dir = pkg_resources.files("bacpipe").joinpath("model_checkpoints")
 for model in models_requiring_checkpoints:
-    if not Path(f"bacpipe/model_checkpoints/{model}").exists():
+    if not checkpoints_dir.joinpath(model).exists():
         models.remove(model)
 
 
@@ -61,7 +59,8 @@ embedding_dimensions = {
 
 embeddings = {}
 
-audio_dir = "bacpipe/tests/test_data"
+test_data_dir = pkg_resources.files("bacpipe.tests.test_data")
+audio_dir = str(test_data_dir)
 
 # TESTING
 

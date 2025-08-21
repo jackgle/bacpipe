@@ -5,11 +5,17 @@ import torchaudio as ta
 import torch
 from tqdm import tqdm
 import logging
+from pathlib import Path
+import importlib.resources as pkg_resources
 
 logger = logging.getLogger("bacpipe")
 
-with open("bacpipe/settings.yaml", "rb") as f:
-    settings = yaml.load(f, Loader=yaml.CLoader)
+try:
+    with pkg_resources.path("bacpipe", "settings.yaml") as settings_path:
+        with open(settings_path, "rb") as f:
+            settings = yaml.load(f, Loader=yaml.CLoader)
+except Exception:
+    settings = {}
 
 MODEL_BASE_PATH = settings["model_base_path"]
 GLOBAL_BATCH_SIZE = settings["global_batch_size"]
@@ -18,8 +24,13 @@ DEVICE = settings["device"]
 
 class ModelBaseClass:
     def __init__(self, sr, segment_length, **kwargs):
-        with open("bacpipe/settings.yaml", "rb") as f:
-            self.config = yaml.load(f, Loader=yaml.CLoader)
+        # Use package-relative path for settings.yaml
+        try:
+            with pkg_resources.path("bacpipe", "settings.yaml") as settings_path:
+                with open(settings_path, "rb") as f:
+                    self.config = yaml.load(f, Loader=yaml.CLoader)
+        except Exception:
+            self.config = {}
 
         for key, value in kwargs.items():
             setattr(self, key, value)

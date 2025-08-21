@@ -8,13 +8,14 @@ from bacpipe.embedding_evaluation.classification.classify import classification_
 from bacpipe.embedding_evaluation.clustering.cluster import clustering
 import numpy as np
 import yaml
+import importlib.resources as pkg_resources
 
-with open("bacpipe/settings.yaml", "r") as f:
+with pkg_resources.files("bacpipe").joinpath("settings.yaml").open("r") as f:
     settings = yaml.safe_load(f)
 
 settings["overwrite"] = True
 
-audio_dir = "bacpipe/tests/audio_test_files/dcase_task5"
+audio_dir = str(pkg_resources.files("bacpipe.tests.audio_test_files.dcase_task5"))
 
 
 def loader_fn(model):

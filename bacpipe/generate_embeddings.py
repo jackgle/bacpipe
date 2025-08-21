@@ -2,11 +2,14 @@ import librosa as lb
 import numpy as np
 from pathlib import Path
 import yaml
+import importlib.resources as pkg_resources
 import time
 from tqdm import tqdm
 import logging
 import importlib
 import json
+from pathlib import Path
+import importlib.resources as pkg_resources
 
 logger = logging.getLogger("bacpipe")
 
@@ -57,8 +60,13 @@ class Loader:
             )
 
     def initialize_path_structure(self, testing=False):
-        with open("bacpipe/settings.yaml", "r") as f:
-            self.config = yaml.load(f, Loader=yaml.CLoader)
+        # Use package-relative path for settings.yaml
+        try:
+            with pkg_resources.path("bacpipe", "settings.yaml") as settings_path:
+                with open(settings_path, "rb") as f:
+                    self.config = yaml.load(f, Loader=yaml.CLoader)
+        except Exception:
+            self.config = {}
 
         if testing:
             self.config["main_results_dir"] = "bacpipe/tests/results_files"
@@ -321,9 +329,15 @@ class Loader:
 class Embedder:
     def __init__(self, model_name, dim_reduction_model=False, testing=False, **kwargs):
         import yaml
+        import importlib.resources as pkg_resources
 
-        with open("bacpipe/settings.yaml", "rb") as f:
-            self.config = yaml.load(f, Loader=yaml.CLoader)
+        # Use package-relative path for settings.yaml
+        try:
+            with pkg_resources.path("bacpipe", "settings.yaml") as settings_path:
+                with open(settings_path, "rb") as f:
+                    self.config = yaml.load(f, Loader=yaml.CLoader)
+        except Exception:
+            self.config = {}
 
         if testing:
             self.config["main_results_dir"] = "bacpipe/tests/results_files"
